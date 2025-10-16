@@ -14,7 +14,7 @@
   --color-popover: #ffffff;
   --color-popover-foreground: #1a1a1a;
 
-  --color-primary: #ea4c89;
+  --color-primary: #0066ff;
   --color-primary-foreground: #ffffff;
 
   --color-secondary: #f8f8f8;
@@ -31,7 +31,7 @@
 
   --color-border: #e8e8e8;
   --color-input: #e8e8e8;
-  --color-ring: #ea4c89;
+  --color-ring: #0066ff;
 
   --color-chart-1: #e67e22;
   --color-chart-2: #2d8659;
@@ -52,8 +52,8 @@
   --color-text-primary: #1a1a1a;
   --color-text-secondary: #666666;
   --color-text-tertiary: #999999;
-  --color-accent-primary: #ea4c89;
-  --color-accent-secondary: #0066ff;
+  --color-accent-primary: #0066ff;
+  --color-accent-secondary: #1e40af;
   --color-overlay-dark: #000000; /* Used with opacity */
   --color-hover-state: #f5f5f5;
   --color-footer-background: #1a1a1a;
