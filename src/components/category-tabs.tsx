@@ -4,17 +4,28 @@ import { useState } from "react";
 
 const categories = [
   { id: "all", name: "All News" },
-  { id: "tech", name: "Tech" },
-  { id: "ai-ml", name: "AI & ML" },
-  { id: "business", name: "Business" },
-  { id: "world", name: "World News" },
-  { id: "science", name: "Science" },
-  { id: "politics", name: "Politics" },
-  { id: "entertainment", name: "Entertainment" }
+  { id: "Tech", name: "Tech" },
+  { id: "AI & ML", name: "AI & ML" },
+  { id: "Business", name: "Business" },
+  { id: "World News", name: "World News" },
+  { id: "Science", name: "Science" },
+  { id: "Politics", name: "Politics" },
+  { id: "Entertainment", name: "Entertainment" }
 ];
 
-export function CategoryTabs() {
+interface CategoryTabsProps {
+  onCategoryChange?: (category: string) => void;
+}
+
+export function CategoryTabs({ onCategoryChange }: CategoryTabsProps) {
   const [activeCategory, setActiveCategory] = useState("all");
+
+  const handleCategoryClick = (categoryId: string) => {
+    setActiveCategory(categoryId);
+    if (onCategoryChange) {
+      onCategoryChange(categoryId);
+    }
+  };
 
   return (
     <section className="bg-white border-b border-[var(--color-border)] sticky top-20 z-40">
@@ -23,7 +34,7 @@ export function CategoryTabs() {
           {categories.map((category) => (
             <button
               key={category.id}
-              onClick={() => setActiveCategory(category.id)}
+              onClick={() => handleCategoryClick(category.id)}
               className={`px-6 py-2 rounded-full font-medium whitespace-nowrap transition-all ${
                 activeCategory === category.id
                   ? "bg-[var(--color-accent-primary)] text-white"
