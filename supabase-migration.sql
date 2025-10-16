@@ -1,7 +1,39 @@
--- Supabase Migration: Add AI Content Generation Fields
+-- Supabase Migration: Create Articles Table with AI Content Generation Fields
 -- Run this in your Supabase SQL Editor
 
--- Add new columns to articles table for AI content generation
+-- Create articles table if it doesn't exist
+CREATE TABLE IF NOT EXISTS articles (
+  id BIGSERIAL PRIMARY KEY,
+  title TEXT NOT NULL,
+  description TEXT,
+  content TEXT,
+  category VARCHAR(50) NOT NULL,
+  source VARCHAR(100) NOT NULL,
+  author VARCHAR(255),
+  published_at TIMESTAMPTZ NOT NULL,
+  image_url TEXT,
+  article_url TEXT NOT NULL UNIQUE,
+  trending_score INTEGER DEFAULT 0,
+  view_count INTEGER DEFAULT 0,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW(),
+  
+  -- AI Content Generation Fields
+  status VARCHAR(20) DEFAULT 'draft',
+  processing_step INTEGER DEFAULT 0,
+  ai_generated_title TEXT,
+  ai_generated_content TEXT,
+  blog_outline TEXT,
+  meta_title VARCHAR(60),
+  meta_description VARCHAR(160),
+  slug VARCHAR(255),
+  seo_score DECIMAL(5,2),
+  image_prompt TEXT,
+  featured_image_url TEXT,
+  source_articles JSONB
+);
+
+-- If table already exists, add new columns
 ALTER TABLE articles 
 ADD COLUMN IF NOT EXISTS status VARCHAR(20) DEFAULT 'draft',
 ADD COLUMN IF NOT EXISTS processing_step INTEGER DEFAULT 0,

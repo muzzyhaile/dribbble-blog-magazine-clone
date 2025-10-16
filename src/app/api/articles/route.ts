@@ -1,7 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { db } from '@/db';
-import { articles } from '@/db/schema';
-import { eq, like, or, desc, asc } from 'drizzle-orm';
+import { getArticleDB } from '@/lib/supabase/client';
 
 const VALID_CATEGORIES = ['Tech', 'AI & ML', 'Business', 'World News', 'Science', 'Politics', 'Entertainment'];
 
@@ -9,6 +7,7 @@ export async function GET(request: NextRequest) {
   try {
     const searchParams = request.nextUrl.searchParams;
     const id = searchParams.get('id');
+    const db = getArticleDB();
 
     // Single article by ID
     if (id) {
@@ -19,19 +18,16 @@ export async function GET(request: NextRequest) {
         }, { status: 400 });
       }
 
-      const article = await db.select()
-        .from(articles)
-        .where(eq(articles.id, parseInt(id)))
-        .limit(1);
+      const article = await db.getArticle(parseInt(id));
 
-      if (article.length === 0) {
+      if (!article) {
         return NextResponse.json({
           error: 'Article not found',
           code: 'NOT_FOUND'
         }, { status: 404 });
       }
 
-      return NextResponse.json(article[0], { status: 200 });
+      return NextResponse.json(article, { status: 200 });
     }
 
     // List articles with filters and pagination
@@ -39,41 +35,12 @@ export async function GET(request: NextRequest) {
     const offset = parseInt(searchParams.get('offset') || '0');
     const category = searchParams.get('category');
     const search = searchParams.get('search');
-    const trending = searchParams.get('trending');
 
-    let query = db.select().from(articles);
-
-    // Apply category filter
-    if (category) {
-      query = query.where(eq(articles.category, category));
-    }
-
-    // Apply search filter
-    if (search) {
-      const searchCondition = or(
-        like(articles.title, `%${search}%`),
-        like(articles.description, `%${search}%`)
-      );
-
-      if (category) {
-        query = db.select()
-          .from(articles)
-          .where(eq(articles.category, category));
-        query = query.where(searchCondition);
-      } else {
-        query = query.where(searchCondition);
-      }
-    }
-
-    // Apply sorting
-    if (trending === 'true') {
-      query = query.orderBy(desc(articles.trendingScore));
-    } else {
-      query = query.orderBy(desc(articles.publishedAt));
-    }
-
-    // Apply pagination
-    const results = await query.limit(limit).offset(offset);
+    const results = await db.getArticles({
+      limit,
+      offset,
+      category: category || undefined,
+    });
 
     return NextResponse.json(results, { status: 200 });
 
@@ -89,6 +56,7 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
+    const db = getArticleDB();
 
     // Validate required fields
     if (!body.title || typeof body.title !== 'string' || body.title.trim() === '') {
@@ -134,7 +102,6 @@ export async function POST(request: NextRequest) {
     }
 
     // Prepare insert data
-    const currentTimestamp = new Date().toISOString();
     const insertData = {
       title: body.title.trim(),
       description: body.description ? body.description.trim() : null,
@@ -147,15 +114,11 @@ export async function POST(request: NextRequest) {
       articleUrl: body.articleUrl.trim(),
       trendingScore: body.trendingScore !== undefined ? body.trendingScore : 0,
       viewCount: 0,
-      createdAt: currentTimestamp,
-      updatedAt: currentTimestamp
     };
 
-    const newArticle = await db.insert(articles)
-      .values(insertData)
-      .returning();
+    const newArticle = await db.createArticle(insertData);
 
-    return NextResponse.json(newArticle[0], { status: 201 });
+    return NextResponse.json(newArticle, { status: 201 });
 
   } catch (error) {
     console.error('POST error:', error);
@@ -170,6 +133,7 @@ export async function DELETE(request: NextRequest) {
   try {
     const searchParams = request.nextUrl.searchParams;
     const id = searchParams.get('id');
+    const db = getArticleDB();
 
     if (!id || isNaN(parseInt(id))) {
       return NextResponse.json({
@@ -178,20 +142,10 @@ export async function DELETE(request: NextRequest) {
       }, { status: 400 });
     }
 
-    const deleted = await db.delete(articles)
-      .where(eq(articles.id, parseInt(id)))
-      .returning();
-
-    if (deleted.length === 0) {
-      return NextResponse.json({
-        error: 'Article not found',
-        code: 'NOT_FOUND'
-      }, { status: 404 });
-    }
+    await db.deleteArticle(parseInt(id));
 
     return NextResponse.json({
-      message: "Article deleted successfully",
-      article: deleted[0]
+      message: "Article deleted successfully"
     }, { status: 200 });
 
   } catch (error) {

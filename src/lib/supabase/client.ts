@@ -84,7 +84,7 @@ export class ArticleDB {
     let query = this.db
       .from('articles')
       .select('*')
-      .order('publishedAt', { ascending: false });
+      .order('published_at', { ascending: false });
 
     if (options?.category) {
       query = query.eq('category', options.category);
@@ -135,9 +135,41 @@ export class ArticleDB {
    * Create a new article
    */
   async createArticle(article: Partial<Article>): Promise<Article> {
+    // Map camelCase to snake_case for database
+    const dbArticle: any = {
+      title: article.title,
+      description: article.description,
+      content: article.content,
+      category: article.category,
+      source: article.source,
+      author: article.author,
+      published_at: article.publishedAt,
+      image_url: article.imageUrl,
+      article_url: article.articleUrl,
+      trending_score: article.trendingScore,
+      view_count: article.viewCount,
+      status: article.status,
+      processing_step: article.processingStep,
+      ai_generated_title: article.aiGeneratedTitle,
+      ai_generated_content: article.aiGeneratedContent,
+      blog_outline: article.blogOutline,
+      meta_title: article.metaTitle,
+      meta_description: article.metaDescription,
+      slug: article.slug,
+      seo_score: article.seoScore,
+      image_prompt: article.imagePrompt,
+      featured_image_url: article.featuredImageUrl,
+      source_articles: article.sourceArticles,
+    };
+
+    // Remove undefined values
+    Object.keys(dbArticle).forEach(key => 
+      dbArticle[key] === undefined && delete dbArticle[key]
+    );
+
     const { data, error } = await this.db
       .from('articles')
-      .insert(article)
+      .insert(dbArticle)
       .select()
       .single();
 

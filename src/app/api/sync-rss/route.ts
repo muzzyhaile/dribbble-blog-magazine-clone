@@ -1,7 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { db } from '@/db';
-import { articles } from '@/db/schema';
-import { eq } from 'drizzle-orm';
+import { getArticleDB } from '@/lib/supabase/client';
 import { getEnabledFeeds } from '@/lib/rss-feeds';
 import { fetchMultipleFeeds, deduplicateArticles } from '@/lib/rss-fetcher';
 
@@ -48,25 +46,23 @@ export async function POST(request: NextRequest) {
     let skippedCount = 0;
     const syncErrors: Array<{ article: string; error: string }> = [];
 
+    const db = getArticleDB();
+
     // Insert articles into database
     for (const article of articlesToSync) {
       try {
         // Check if article already exists (by URL)
         if (skipDuplicates) {
-          const existing = await db.select()
-            .from(articles)
-            .where(eq(articles.articleUrl, article.articleUrl))
-            .limit(1);
+          const exists = await db.articleExists(article.articleUrl);
 
-          if (existing.length > 0) {
+          if (exists) {
             skippedCount++;
             continue;
           }
         }
 
         // Insert new article
-        const currentTimestamp = new Date().toISOString();
-        await db.insert(articles).values({
+        await db.createArticle({
           title: article.title,
           description: article.description,
           content: article.content,
@@ -78,8 +74,6 @@ export async function POST(request: NextRequest) {
           articleUrl: article.articleUrl,
           trendingScore: article.trendingScore,
           viewCount: 0,
-          createdAt: currentTimestamp,
-          updatedAt: currentTimestamp,
         });
 
         syncedCount++;
