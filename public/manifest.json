@@ -1,0 +1,21 @@
+{
+  "name": "AI Agents Daily",
+  "short_name": "AI Agents",
+  "description": "Your daily source for AI and technology news",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#EA4C89",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["news", "technology", "ai"],
+  "lang": "en-US",
+  "dir": "ltr"
+}
