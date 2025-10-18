@@ -2,6 +2,7 @@
 
 import { Clock, ExternalLink } from "lucide-react";
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 
 interface NewsArticle {
   id: number;
@@ -35,6 +36,7 @@ function getRelativeTime(dateString: string): string {
 }
 
 export function NewsFeed({ selectedCategory = "all", searchQuery = "" }: NewsFeedProps) {
+  const router = useRouter();
   const [articles, setArticles] = useState<NewsArticle[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -139,7 +141,7 @@ export function NewsFeed({ selectedCategory = "all", searchQuery = "" }: NewsFee
                 <article
                   key={article.id}
                   className="group bg-white rounded-xl border border-[var(--color-border)] overflow-hidden hover:shadow-lg transition-all duration-300 cursor-pointer"
-                  onClick={() => window.open(article.articleUrl, "_blank", "noopener,noreferrer")}
+                  onClick={() => router.push(`/article/${article.id}`)}
                 >
                   <div className="relative h-48 overflow-hidden">
                     <img

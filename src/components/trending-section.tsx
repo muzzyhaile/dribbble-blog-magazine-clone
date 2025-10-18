@@ -2,6 +2,7 @@
 
 import { TrendingUp, Clock } from "lucide-react";
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 
 interface TrendingArticle {
   id: number;
@@ -26,6 +27,7 @@ function getRelativeTime(dateString: string): string {
 }
 
 export function TrendingSection() {
+  const router = useRouter();
   const [trendingArticles, setTrendingArticles] = useState<TrendingArticle[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -89,7 +91,7 @@ export function TrendingSection() {
               <div
                 key={article.id}
                 className="group bg-white rounded-xl p-6 hover:shadow-lg transition-all duration-300 cursor-pointer border border-[var(--color-border)]"
-                onClick={() => window.open(article.articleUrl, "_blank", "noopener,noreferrer")}
+                onClick={() => router.push(`/article/${article.id}`)}
               >
                 <div className="flex items-start gap-4 mb-3">
                   <div className="flex-shrink-0 w-10 h-10 bg-gradient-to-br from-[var(--color-accent-primary)] to-[var(--color-accent-secondary)] rounded-full flex items-center justify-center">
